@@ -3,8 +3,8 @@ pub mod IssuerRegistry {
     use idee::interfaces::IAdminRegistry::IAdminRegistry;
     use idee::types::IssuerTypes::{Issuer, IssuerDeactivated, IssuerRegistered};
     use starknet::storage::{
-        Map, StorageMapReadAccess, StorageMapWriteAccess, StoragePointerReadAccess,
-        StoragePointerWriteAccess, Vec,
+        Map, MutableVecTrait, StorageMapReadAccess, StorageMapWriteAccess, StoragePointerReadAccess,
+        StoragePointerWriteAccess, Vec, VecTrait,
     };
     use starknet::{ContractAddress, get_block_timestamp, get_caller_address};
 
@@ -30,14 +30,17 @@ pub mod IssuerRegistry {
     #[abi(embed_v0)]
     impl AdminRegistryImpl of IAdminRegistry<ContractState> {
         fn register_issuer(
-            ref self: ContractState, issuer_address: ContractAddress, name: felt252,
+            ref self: ContractState, issuer_address: ContractAddress, name: felt252, did: felt252,
         ) {
             // Only admin can register issuers
             let caller = get_caller_address();
             assert(self.admin.read() != caller, 'Only admin can register issuers');
             assert(!self.issuers.read(issuer_address).is_active, 'Issuer already registered');
             let new_issuer = Issuer {
-                name: name, is_active: true, registration_date: get_block_timestamp(),
+                name: name,
+                is_active: true,
+                registration_date: get_block_timestamp(),
+                issuers_did: did,
             };
             self.issuers.write(issuer_address, new_issuer);
             self.allIssuers.push(issuer_address);

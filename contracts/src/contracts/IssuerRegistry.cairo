@@ -71,5 +71,21 @@ pub mod IssuerRegistry {
             self.credentials.entry(caller).write(holder_address, credential);
             self.emit(CredentialRevoked { issuer: caller, reason: reason })
         }
+
+        fn anchor_vc_root(ref self: ContractState, vc_root: felt252) {}
+
+        fn is_vc_root_anchored(self: @ContractState, vc_root: felt252) -> bool {
+            false
+        }
+
+        fn set_status_root(
+            ref self: ContractState, schema: felt252, list_id: felt252, new_root: felt252,
+        ) {}
+
+        fn get_status_root(
+            self: @ContractState, issuer: ContractAddress, schema: felt252, list_id: felt252,
+        ) -> felt252 {
+            0
+        }
     }
 }

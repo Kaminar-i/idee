@@ -4,6 +4,7 @@ use starknet::ContractAddress;
 pub struct Issuer {
     pub name: felt252,
     pub is_active: bool,
+    pub issuers_did: felt252,
     pub registration_date: u64 //TODO some of this things can be stored off chain
 }
 
