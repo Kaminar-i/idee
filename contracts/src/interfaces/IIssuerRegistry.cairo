@@ -1,28 +1,30 @@
 use starknet::ContractAddress;
-use crate::types::RegistryTypes;
-
 #[starknet::interface]
 pub trait IIssuerRegistry<TContractState> {
     fn issue_credential(
-        ref self: TContractState, holder_id: felt252, credential_hash: felt252,
-    ) -> bool;
+        ref self: TContractState,
+        admin_registry_address: ContractAddress,
+        holder_address: ContractAddress,
+        holder_id: felt252,
+        credential_hash: felt252,
+    );
 
     fn revoke_credntial(
-        ref self: TContractState, holder_id: felt252, credential_hash: felt252, reason: felt252,
-    ) -> bool;
+        ref self: TContractState,
+        admin_registry_address: ContractAddress,
+        holder_address: ContractAddress,
+        holder_id: felt252,
+        credential_hash: felt252,
+        reason: felt252,
+    );
 
-    fn register_issuer(
-        ref self: TContractState, issuer_addres: ContractAddress, metadata: felt252,
-    ) -> bool;
+    fn anchor_vc_root(ref self: TContractState, vc_root: felt252);
+    fn is_vc_root_anchored(self: @TContractState, vc_root: felt252) -> bool;
 
-    fn verify_proof_commitment(
-        self: @TContractState,
-        proof_commitment: felt252,
-        disclosed_claims_hash: felt252,
-        verifier_requirements: Array<felt252>,
-    ) -> bool;
-
-    fn verify_credential_status(
-        self: @TContractState, credential_hash: felt252,
-    ) -> RegistryTypes::CredentialStatus;
+    fn set_status_root(
+        ref self: TContractState, schema: felt252, list_id: felt252, new_root: felt252,
+    );
+    fn get_status_root(
+        self: @TContractState, issuer: ContractAddress, schema: felt252, list_id: felt252,
+    ) -> felt252;
 }

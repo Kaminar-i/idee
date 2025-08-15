@@ -1,27 +1,26 @@
 use starknet::ContractAddress;
 
 #[derive(Drop, starknet::Event)]
-struct CredentialIssued {
+pub struct CredentialIssued {
     #[key]
-    holder: felt252,
+    pub holder: felt252,
     #[key]
-    issuer: ContractAddress,
-    credential_hash: felt252,
-    schema_version: u32,
+    pub issuer: ContractAddress,
+    pub issuer_name: felt252,
 }
 
 #[derive(Drop, starknet::Event)]
-struct CredentialRevoked {
+pub struct CredentialRevoked {
     #[key]
-    credential_hash: felt252,
-    reason: felt252,
+    pub issuer: ContractAddress,
+    pub reason: felt252,
 }
 
 #[derive(Drop, starknet::Event)]
-struct IssuerRegistered {
+pub struct IssuerRegistered {
     #[key]
-    issuer: ContractAddress,
-    metadata: felt252,
+    pub issuer: ContractAddress,
+    pub metadata: felt252,
 }
 
 #[derive(Default, Drop, Copy, Serde, PartialEq, starknet::Store)]
@@ -50,4 +49,11 @@ impl Felt252TryIntoGenre of TryInto<felt252, CredentialStatus> {
             Option::None
         }
     }
+}
+
+#[derive(Default, Drop, Copy, Serde, PartialEq, starknet::Store)]
+pub struct Credential {
+    pub status: CredentialStatus,
+    pub holder_id: felt252,
+    pub credential_hash: felt252,
 }
