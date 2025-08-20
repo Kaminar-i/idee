@@ -1,5 +1,6 @@
 #[starknet::contract]
 pub mod IssuerRegistry {
+    use core::ecdsa;
     use idee::interfaces::IAdminRegistry::IAdminRegistry;
     use idee::types::IssuerTypes::{Issuer, IssuerDeactivated, IssuerRegistered};
     use starknet::storage::{
@@ -30,28 +31,31 @@ pub mod IssuerRegistry {
     #[abi(embed_v0)]
     impl AdminRegistryImpl of IAdminRegistry<ContractState> {
         fn register_issuer(
-            ref self: ContractState, issuer_address: ContractAddress, name: felt252, did: felt252,
+            ref self: ContractState,
+            issuer_address: ContractAddress,
+            public_key: felt252,
+            msgHash: felt252,
+            signature_r: felt252,
+            signature_s: felt252,
         ) {
+            let verified = ecdsa::check_ecdsa_signature(
+                msgHash, public_key, signature_r, signature_s,
+            );
+            assert(!verified, 'Invalid Signature');
+
             // Only admin can register issuers
-            let caller = get_caller_address();
-            assert(self.admin.read() != caller, 'Only admin can register issuers');
+            self.assert_admin();
             assert(!self.issuers.read(issuer_address).is_active, 'Issuer already registered');
-            let new_issuer = Issuer {
-                name: name,
-                is_active: true,
-                registration_date: get_block_timestamp(),
-                issuers_did: did,
-            };
+            let new_issuer = Issuer { is_active: true, registration_date: get_block_timestamp() };
             self.issuers.write(issuer_address, new_issuer);
             self.allIssuers.push(issuer_address);
-            self.emit(IssuerRegistered { issuer_address, name });
+            self.emit(IssuerRegistered { issuer_address });
         }
 
         fn revoke_issuer(
             ref self: ContractState, issuer_address: ContractAddress, reason: felt252,
         ) {
-            let caller = get_caller_address();
-            assert(self.admin.read() != caller, 'Only admin can update status');
+            self.assert_admin();
 
             // Get existing issuer
             let mut issuer = self.issuers.read(issuer_address);
@@ -77,6 +81,14 @@ pub mod IssuerRegistry {
                 addresses.append(self.allIssuers.at(i).read());
             }
             addresses
+        }
+    }
+
+    #[generate_trait]
+    pub impl InternalFunctions of InternalFunctionsTrait {
+        fn assert_admin(self: @ContractState) {
+            let caller = get_caller_address();
+            assert(self.admin.read() != caller, 'Only admin can register issuers');
         }
     }
 }
