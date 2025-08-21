@@ -14,14 +14,10 @@ func NewDIDStarkDocument(address *felt.Felt, publicKeyHex *felt.Felt) *types.DID
 		},
 		ID: did.DID(),
 		VerificationMethod: types.VerificationMethod{
-			ID:         did.KeyID(),
-			Type:       "JsonWebKey2020",
-			Controller: did.DID(),
-			PublicKeyJwk: types.PublicKeyJwk{
-				Kty: "OKP",
-				Crv: "stark-curve",
-				X:   publicKeyHex,
-			},
+			ID:           did.KeyID(),
+			Type:         "StarknetKey2024",
+			Controller:   did.DID(),
+			PublicKeyHex: publicKeyHex.String(),
 		},
 		AssertionMethod: []string{
 			did.KeyID(),

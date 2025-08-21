@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/NethermindEth/juno/core/felt"
 	"github.com/NethermindEth/starknet.go/typedData"
 )
 
@@ -25,17 +24,11 @@ func (r StarkDid) String() string {
 	return string(r)
 }
 
-type PublicKeyJwk struct {
-	Kty string     `json:"kty"`
-	Crv string     `json:"crv"`
-	X   *felt.Felt `json:"x"`
-}
-
 type VerificationMethod struct {
-	ID           string       `json:"id"`
-	Type         string       `json:"type"`
-	Controller   string       `json:"controller"`
-	PublicKeyJwk PublicKeyJwk `json:"publicKeyJwk"`
+	ID           string `json:"id"`
+	Type         string `json:"type"`
+	Controller   string `json:"controller"`
+	PublicKeyHex string `json:"publicKeyhex"`
 }
 
 type DIDDocument struct {
@@ -54,7 +47,7 @@ func (d *DIDDocument) ToJson() (string, error) {
 	return string(bytes), nil
 }
 
-func (d *DIDDocument) ToStarkTypedData() (*typedData.TypedData, error) {
+func (d DIDDocument) ToStarkTypedData() (*typedData.TypedData, error) {
 	verificationMethodParams := []typedData.TypeParameter{
 		{Name: "id", Type: "felt"},
 		{Name: "type", Type: "felt"},
@@ -111,10 +104,10 @@ func (d *DIDDocument) ToStarkTypedData() (*typedData.TypedData, error) {
 	message := map[string]any{
 		"id": fmt.Sprintf("0x%x", idHash[:31]),
 		"verificationMethod": map[string]any{
-			"id":         fmt.Sprintf("0x%x", vmIDHash[:31]),
-			"type":       fmt.Sprintf("0x%x", vmTypeHash[:31]),
-			"controller": fmt.Sprintf("0x%x", vmControllerHash[:31]),
-			"publicKeyX": d.VerificationMethod.PublicKeyJwk.X,
+			"id":           fmt.Sprintf("0x%x", vmIDHash[:31]),
+			"type":         fmt.Sprintf("0x%x", vmTypeHash[:31]),
+			"controller":   fmt.Sprintf("0x%x", vmControllerHash[:31]),
+			"publicKeyHex": d.VerificationMethod.PublicKeyHex,
 		},
 		"assertionMethod": assertionMethodValue,
 		"timestamp":       time.Now().Unix(),
