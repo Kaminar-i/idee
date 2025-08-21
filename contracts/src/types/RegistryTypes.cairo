@@ -6,7 +6,6 @@ pub struct CredentialIssued {
     pub holder: felt252,
     #[key]
     pub issuer: ContractAddress,
-    pub issuer_name: felt252,
 }
 
 #[derive(Drop, starknet::Event)]

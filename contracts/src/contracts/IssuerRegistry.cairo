@@ -42,12 +42,7 @@ pub mod IssuerRegistry {
                 status: CredentialStatus::Active,
             };
             self.credentials.entry(caller).write(holder_address, credential);
-            self
-                .emit(
-                    CredentialIssued {
-                        holder: holder_id, issuer_name: issuer.name, issuer: caller,
-                    },
-                );
+            self.emit(CredentialIssued { holder: holder_id, issuer: caller });
         }
 
 
